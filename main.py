@@ -9,6 +9,8 @@ from db.database_db import init_db
 from db.users_db import ensure_admin_exists
 from services.health_poll_srv import health_poll_worker
 from routes import auth_rt, health_rt, ui_rt
+from routes import register_routes
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -32,9 +34,7 @@ app = FastAPI(title=settings.APP_TITLE, lifespan=lifespan, docs_url=None, redoc_
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-app.include_router(auth_rt.router)
-app.include_router(health_rt.router)
-app.include_router(ui_rt.router)
+register_routes(app)
 
 if __name__ == "__main__":
     import uvicorn
