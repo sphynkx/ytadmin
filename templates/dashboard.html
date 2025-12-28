@@ -3,65 +3,140 @@
 <head>
     <title>YTAdmin Dashboard</title>
     <style>
-        body { font-family: Consolas, monospace; background: #222; color: #eee; margin: 0; padding: 20px; }
-        .header { display: flex; justify-content: space-between; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 20px; }
-        .status-box { padding: 15px; background: #333; border-radius: 5px; margin-bottom: 20px; }
-        .healthy { color: #4caf50; font-weight: bold; }
-        .unhealthy { color: #f44336; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #444; padding: 8px; text-align: left; }
-        th { background-color: #333; }
-        a { color: #88ceeb; cursor: pointer; text-decoration: underline; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa; 
+            color: #333; 
+            margin: 0; 
+            padding: 20px; 
+        }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            border-bottom: 1px solid #e1e4e8; 
+            padding-bottom: 15px; 
+            margin-bottom: 25px; 
+        }
+        h2, h3 { margin: 0; font-weight: 500; }
+        
+        .status-box { 
+            padding: 20px; 
+            background: #ffffff; 
+            border: 1px solid #e1e4e8; 
+            border-radius: 6px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .healthy { color: #28a745; font-weight: bold; }
+        .unhealthy { color: #dc3545; font-weight: bold; }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: #ffffff; 
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        th, td { 
+            border-bottom: 1px solid #e1e4e8; 
+            padding: 12px 15px; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #f8f9fa; 
+            color: #586069; 
+            font-weight: 600; 
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #fcfcfc; }
+        
+        a.logout-btn { 
+            color: #0366d6; 
+            cursor: pointer; 
+            text-decoration: none; 
+            font-size: 0.9em;
+            border: 1px solid #e1e4e8;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background: white;
+        }
+        a.logout-btn:hover { background-color: #f3f4f6; text-decoration: none; }
     </style>
 </head>
 <body>
     <div class="header">
         <h2>Control Plane: {{ username }}</h2>
-        <a onclick="logout()">Logout</a>
+        <a class="logout-btn" onclick="logout()">Sign out</a>
     </div>
 
     <div class="status-box">
-        <div>Current Status: <span id="mainStatus" class="unhealthy">LOADING...</span></div>
-        <div style="font-size: 0.8em; color: #aaa; margin-top: 5px;" id="statusDetails"></div>
+        <div style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">TARGET MONITORING</div>
+        
+        <div style="font-size: 1.5rem; margin-bottom: 5px;">
+            Current Status: <span id="mainStatus" class="unhealthy">LOADING...</span>
+        </div>
+        <div style="font-size: 0.9em; color: #666;" id="statusDetails"></div>
     </div>
 
     <h3>Events History</h3>
+    <br>
     <table id="historyTable">
         <thead><tr><th>Time</th><th>Result</th><th>Details</th></tr></thead>
         <tbody></tbody>
     </table>
 
     <script>
+        async function fetchWithAuth(url) {
+            const response = await fetch(url);
+            if (response.status === 401) {
+                window.location.href = '/'; 
+                return null;
+            }
+            return response;
+        }
+
         async function logout() {
             await fetch('/logout', { method: 'POST' });
             window.location.reload();
         }
 
         async function refresh() {
-            const sReq = await fetch('/api/health/current');
-            
-            if (sReq.status === 401) {
-                window.location.href = '/';
-                return;
-            }
-
-            if (sReq.ok) {
-                const sData = await sReq.json();
+            const sResp = await fetchWithAuth('/api/health/current');
+            if (sResp && sResp.ok) {
+                const sData = await sResp.json();
                 const el = document.getElementById('mainStatus');
-                el.innerText = sData.healthy ? "SERVING" : "DOWN";
+                
+                el.innerText = sData.healthy ? "HEALTHY" : "DOWN";
                 el.className = sData.healthy ? "healthy" : "unhealthy";
-                document.getElementById('statusDetails').innerText = JSON.stringify(sData.details);
+                
+                let detailsText = sData.status_code || "";
+                if (sData.error) detailsText += " (" + sData.error + ")";
+                
+                if (sData.details && sData.details.version) {
+                     detailsText += " | Ver: " + sData.details.version;
+                }
+                
+                document.getElementById('statusDetails').innerText = detailsText;
             }
 
-            const hReq = await fetch('/api/health/history');
-            if (hReq.ok) {
-                const hData = await hReq.json();
+            const hResp = await fetchWithAuth('/api/health/history');
+            if (hResp && hResp.ok) {
+                const hData = await hResp.json();
                 const tbody = document.querySelector('#historyTable tbody');
                 tbody.innerHTML = '';
                 hData.forEach(row => {
                     const tr = document.createElement('tr');
                     const color = row.healthy ? 'healthy' : 'unhealthy';
-                    tr.innerHTML = `<td>${row.created_at}</td><td class="${color}">${row.status_code}</td><td>${row.error_message || ''}</td>`;
+                    
+                    let details = row.error_message || row.status_code;
+
+                    tr.innerHTML = `<td style="color:#555">${row.created_at}</td><td class="${color}">${row.status_code}</td><td style="color:#666">${details}</td>`;
                     tbody.appendChild(tr);
                 });
             }
