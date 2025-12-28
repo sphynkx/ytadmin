@@ -5,12 +5,12 @@ from typing import Dict, Any
 from config.main_conf import settings
 from db.history_db import save_snapshot
 
-from services.ytadmin_proto import ytadmin_pb2, ytadmin_pb2_grpc
+from services.ytadmin_proto import yurtube_pb2, yurtube_pb2_grpc
 
 logger = logging.getLogger(__name__)
 
-class AdminIngestServicer(ytadmin_pb2_grpc.AdminIngestServicer):
-    async def PushHealth(self, request: ytadmin_pb2.PushHealthRequest, context: grpc.aio.ServicerContext) -> ytadmin_pb2.PushAck:
+class AdminIngestServicer(yurtube_pb2_grpc.AdminIngestServicer):
+    async def PushHealth(self, request: yurtube_pb2.PushHealthRequest, context: grpc.aio.ServicerContext) -> yurtube_pb2.PushAck:
         try:
             identity = request.identity
             identity_dict: Dict[str, Any] = {
@@ -45,11 +45,11 @@ class AdminIngestServicer(ytadmin_pb2_grpc.AdminIngestServicer):
             logger.exception("PushHealth processing failed")
             return ytadmin_pb2.PushAck(ok=False, message=str(e))
 
-    async def PushEffConf(self, request: ytadmin_pb2.PushEffConfRequest, context: grpc.aio.ServicerContext) -> ytadmin_pb2.PushAck:
+    async def PushEffConf(self, request: yurtube_pb2.PushEffConfRequest, context: grpc.aio.ServicerContext) -> yurtube_pb2.PushAck:
         try:
             identity = request.identity
             logger.info(f"EffConf push from {identity.name} ({identity.host}) redacted_keys={list(request.redacted_keys)}")
-            return ytadmin_pb2.PushAck(ok=True, message="EffConf accepted")
+            return yurtube_pb2.PushAck(ok=True, message="EffConf accepted")
         except Exception as e:
             logger.exception("PushEffConf processing failed")
             return ytadmin_pb2.PushAck(ok=False, message=str(e))
@@ -60,7 +60,7 @@ async def start_ingest_server():
     Returns a server object (must be stopped during shutdown).
     """
     server = grpc.aio.server()
-    ytadmin_pb2_grpc.add_AdminIngestServicer_to_server(AdminIngestServicer(), server)
+    yurtube_pb2_grpc.add_AdminIngestServicer_to_server(AdminIngestServicer(), server)
     bind_addr = f"{settings.ADMIN_INGEST_HOST}:{settings.ADMIN_INGEST_PORT}"
     server.add_insecure_port(bind_addr)
     await server.start()
