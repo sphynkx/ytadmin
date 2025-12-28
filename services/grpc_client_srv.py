@@ -1,49 +1,47 @@
 import grpc
 import logging
 from config.main_conf import settings
-
-try:
-    from services.ytadmin_proto import ytadmin_pb2, ytadmin_pb2_grpc
-except ImportError:
-    ytadmin_pb2 = None
-    ytadmin_pb2_grpc = None
+from grpc_health.v1 import health_pb2, health_pb2_grpc
 
 logger = logging.getLogger(__name__)
 
 async def check_app_health_grpc():
     """
-    Makes a gRPC request to the target application.
-    Target App (Server) <- Admin Service (Client)
+    Makes a gRPC request to the standard grpc.health.v1.Health service on the target application.
     """
-    if ytadmin_pb2 is None:
-        return {"healthy": False, "error": "Proto stubs not found"}
-
     target = f"{settings.TARGET_APP_HOST}:{settings.TARGET_APP_PORT}"
     
     try:
-        # Use insecure channel for test!! TODO: add TLS
         async with grpc.aio.insecure_channel(target) as channel:
-            stub = ytadmin_pb2_grpc.HealthServiceStub(channel)
+            stub = health_pb2_grpc.HealthStub(channel)
             
-            response = await stub.Check(ytadmin_pb2.HealthRequest(), timeout=2.0)
+            request = health_pb2.HealthCheckRequest(service="")
+            
+            response = await stub.Check(request, timeout=2.0)
+            
+            is_serving = (response.status == health_pb2.HealthCheckResponse.SERVING)
+            status_name = health_pb2.HealthCheckResponse.ServingStatus.Name(response.status)
             
             return {
-                "healthy": response.healthy,
-                "status_code": "OK" if response.healthy else "UNHEALTHY",
-                "details": {"version": response.version, "msg": response.status_message},
+                "healthy": is_serving,
+                "status_code": status_name,
+                "details": {"msg": "Standard Health Check OK"},
                 "error": None
             }
 
     except grpc.RpcError as e:
         code = e.code() if hasattr(e, 'code') else "UNKNOWN"
+        details = e.details() if hasattr(e, 'details') else str(e)
         return {
             "healthy": False, 
-            "status_code": str(code), 
-            "error": e.details() if hasattr(e, 'details') else str(e)
+            "status_code": str(code),
+            "details": {},
+            "error": details
         }
     except Exception as e:
         return {
             "healthy": False, 
             "status_code": "INTERNAL", 
+            "details": {},
             "error": str(e)
         }

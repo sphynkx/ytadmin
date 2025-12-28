@@ -13,7 +13,7 @@ SESSIONS = {}
 async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     user = await get_user_by_username(form_data.username)
     
-    if not user or not verify_password(user['password_hash'], form_data.password):
+    if not user or not verify_password(form_data.password, user['password_hash']):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     
     session_id = str(uuid.uuid4())

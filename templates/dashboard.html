@@ -39,10 +39,16 @@
 
         async function refresh() {
             const sReq = await fetch('/api/health/current');
+            
+            if (sReq.status === 401) {
+                window.location.href = '/';
+                return;
+            }
+
             if (sReq.ok) {
                 const sData = await sReq.json();
                 const el = document.getElementById('mainStatus');
-                el.innerText = sData.healthy ? "HEALTHY" : "DOWN";
+                el.innerText = sData.healthy ? "SERVING" : "DOWN";
                 el.className = sData.healthy ? "healthy" : "unhealthy";
                 document.getElementById('statusDetails').innerText = JSON.stringify(sData.details);
             }
@@ -55,7 +61,7 @@
                 hData.forEach(row => {
                     const tr = document.createElement('tr');
                     const color = row.healthy ? 'healthy' : 'unhealthy';
-                    tr.innerHTML = `<td>${row.created_at}</td><td class="${color}">${row.status_code}</td><td>${row.error_message || row.details_json || ''}</td>`;
+                    tr.innerHTML = `<td>${row.created_at}</td><td class="${color}">${row.status_code}</td><td>${row.error_message || ''}</td>`;
                     tbody.appendChild(tr);
                 });
             }

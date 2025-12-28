@@ -44,6 +44,5 @@ if __name__ == "__main__":
         "main:app", 
         host=settings.ADMIN_HOST, 
         port=settings.ADMIN_PORT, 
-        reload=True,
-        reload_excludes=["*.db", "*.db-journal", "*.log"] 
+        reload=False 
     )
