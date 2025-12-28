@@ -1,11 +1,15 @@
 import grpc
 import logging
 from typing import Dict, Any
+import time
 
 from config.main_conf import settings
 from db.history_db import save_snapshot
 
 from services.ytadmin_proto import yurtube_pb2, yurtube_pb2_grpc
+
+
+from services.health_poll_srv import MEMORY_STATUS
 
 logger = logging.getLogger(__name__)
 
@@ -40,10 +44,14 @@ class AdminIngestServicer(yurtube_pb2_grpc.AdminIngestServicer):
                 error=None
             )
 
-            return ytadmin_pb2.PushAck(ok=True, message="Health snapshot ingested")
+            MEMORY_STATUS["healthy"] = bool(request.healthy)
+            MEMORY_STATUS["details"] = details
+            MEMORY_STATUS["last_push_ts"] = time.time()
+
+            return yurtube_pb2.PushAck(ok=True, message="Health snapshot ingested")
         except Exception as e:
             logger.exception("PushHealth processing failed")
-            return ytadmin_pb2.PushAck(ok=False, message=str(e))
+            return yurtube_pb2.PushAck(ok=False, message=str(e))
 
     async def PushEffConf(self, request: yurtube_pb2.PushEffConfRequest, context: grpc.aio.ServicerContext) -> yurtube_pb2.PushAck:
         try:
@@ -52,7 +60,7 @@ class AdminIngestServicer(yurtube_pb2_grpc.AdminIngestServicer):
             return yurtube_pb2.PushAck(ok=True, message="EffConf accepted")
         except Exception as e:
             logger.exception("PushEffConf processing failed")
-            return ytadmin_pb2.PushAck(ok=False, message=str(e))
+            return yurtube_pb2.PushAck(ok=False, message=str(e))
 
 async def start_ingest_server():
     """

@@ -28,6 +28,11 @@ message PushAck {
   string message = 2;
 }
 
+message IdentityRequest {}
+service AppProbe {
+  rpc GetIdentity (IdentityRequest) returns (ServiceIdentity);
+}
+
 service AdminIngest {
   rpc PushHealth (PushHealthRequest) returns (PushAck);
   rpc PushEffConf (PushEffConfRequest) returns (PushAck);

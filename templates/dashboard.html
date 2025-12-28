@@ -119,12 +119,12 @@
                 el.innerText = sData.healthy ? "HEALTHY" : "DOWN";
                 el.className = sData.healthy ? "healthy" : "unhealthy";
 
-                const appName = (sData.details && sData.details.app_name)
-                    || (sData.details && sData.details.identity && sData.details.identity.name)
-                    || 'Unknown';
-                const targetAddr = (sData.details && sData.details.target)
-                    || (sData.details && sData.details.identity && sData.details.identity.host)
-                    || '';
+                let appName = 'Unknown';
+                let targetAddr = '';
+                if (sData.details && sData.details.identity) {
+                    appName = sData.details.identity.name || appName;
+                    targetAddr = sData.details.identity.host || targetAddr;
+                }
                 document.getElementById('targetName').innerText = appName;
                 document.getElementById('targetAddr').innerText = targetAddr ? `(${targetAddr})` : '';
 

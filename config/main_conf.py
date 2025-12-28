@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     ADMIN_ENABLED: bool = True
     ADMIN_POLL_INTERVAL_SEC: int = 10
 
+    ADMIN_PULL_ENABLED: bool = True
+    PUSH_STALE_THRESHOLD_SEC: int = 60
+
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "SECRET"
 
