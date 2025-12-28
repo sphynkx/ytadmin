@@ -9,7 +9,10 @@ class Settings(BaseSettings):
     
     ADMIN_ENABLED: bool = True
     ADMIN_POLL_INTERVAL_SEC: int = 10
-    
+
+    ADMIN_USERNAME: str = "admin"
+    ADMIN_PASSWORD: str = "SECRET"
+
     TARGET_APP_HOST: str = "localhost"
     TARGET_APP_PORT: int = 50051
     

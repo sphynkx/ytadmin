@@ -1,5 +1,9 @@
 from db.sqlite_db import get_db_connection
 from utils.security_ut import get_password_hash
+from config.main_conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 async def get_user_by_username(username: str):
     async with get_db_connection() as db:
@@ -17,7 +21,11 @@ async def create_user(username: str, password_str: str):
         await db.commit()
 
 async def ensure_admin_exists():
-    user = await get_user_by_username("admin")
+    target_user = settings.ADMIN_USERNAME
+    user = await get_user_by_username(target_user)
+    
     if not user:
-        await create_user("admin", "admin")
-        print("--- [DB] Default Admin Created (user: admin, pass: admin) ---")
+        logger.info(f"--- [DB] Creating initial admin user: {target_user} ---")
+        await create_user(target_user, settings.ADMIN_PASSWORD)
+    else:
+        logger.info(f"--- [DB] Admin user '{target_user}' already exists ---")

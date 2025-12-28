@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+import uvicorn
 
 from config.main_conf import settings
 from db.database_db import init_db
@@ -39,5 +40,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 register_routes(app)
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host=settings.ADMIN_HOST, port=settings.ADMIN_PORT, reload=True)
+    uvicorn.run(
+        "main:app", 
+        host=settings.ADMIN_HOST, 
+        port=settings.ADMIN_PORT, 
+        reload=True,
+        reload_excludes=["*.db", "*.db-journal", "*.log"] 
+    )
