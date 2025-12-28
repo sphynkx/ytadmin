@@ -3,12 +3,12 @@ import logging
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
-import uvicorn
 
 from config.main_conf import settings
 from db.database_db import init_db
 from db.users_db import ensure_admin_exists
 from services.health_poll_srv import health_poll_worker
+from services.ingest_server_srv import start_ingest_server
 from routes import register_routes
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -22,16 +22,18 @@ async def lifespan(app: FastAPI):
     
     logger.info("--- STARTUP: Launching Background Tasks ---")
     poll_task = asyncio.create_task(health_poll_worker())
+    ingest_server = await start_ingest_server()
     
     yield
     
     logger.info("--- SHUTDOWN: Stopping Background Tasks ---")
-    
     poll_task.cancel()
     try:
         await poll_task
     except asyncio.CancelledError:
         logger.info("Background task cancelled successfully")
+    await ingest_server.stop(grace=5)
+    logger.info("AdminIngest gRPC server stopped")
 
 app = FastAPI(title=settings.APP_TITLE, lifespan=lifespan, docs_url=None, redoc_url=None)
 
@@ -40,9 +42,5 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 register_routes(app)
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "main:app", 
-        host=settings.ADMIN_HOST, 
-        port=settings.ADMIN_PORT, 
-        reload=False 
-    )
+    import uvicorn
+    uvicorn.run("main:app", host=settings.ADMIN_HOST, port=settings.ADMIN_PORT)

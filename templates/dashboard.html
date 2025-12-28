@@ -67,6 +67,8 @@
             background: white;
         }
         a.logout-btn:hover { background-color: #f3f4f6; text-decoration: none; }
+
+        .meta { color: #666; font-size: 0.9rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -76,8 +78,10 @@
     </div>
 
     <div class="status-box">
-        <div style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">TARGET MONITORING</div>
-        
+        <div class="meta">
+            Target: <strong id="targetName">Loading...</strong> 
+            <span id="targetAddr" style="margin-left:8px; color:#888"></span>
+        </div>
         <div style="font-size: 1.5rem; margin-bottom: 5px;">
             Current Status: <span id="mainStatus" class="unhealthy">LOADING...</span>
         </div>
@@ -87,7 +91,7 @@
     <h3>Events History</h3>
     <br>
     <table id="historyTable">
-        <thead><tr><th>Time</th><th>Result</th><th>Details</th></tr></thead>
+        <thead><tr><th>Time</th><th>Target</th><th>Result</th><th>Details</th></tr></thead>
         <tbody></tbody>
     </table>
 
@@ -114,14 +118,18 @@
                 
                 el.innerText = sData.healthy ? "HEALTHY" : "DOWN";
                 el.className = sData.healthy ? "healthy" : "unhealthy";
-                
+
+                const appName = (sData.details && sData.details.app_name)
+                    || (sData.details && sData.details.identity && sData.details.identity.name)
+                    || 'Unknown';
+                const targetAddr = (sData.details && sData.details.target)
+                    || (sData.details && sData.details.identity && sData.details.identity.host)
+                    || '';
+                document.getElementById('targetName').innerText = appName;
+                document.getElementById('targetAddr').innerText = targetAddr ? `(${targetAddr})` : '';
+
                 let detailsText = sData.status_code || "";
                 if (sData.error) detailsText += " (" + sData.error + ")";
-                
-                if (sData.details && sData.details.version) {
-                     detailsText += " | Ver: " + sData.details.version;
-                }
-                
                 document.getElementById('statusDetails').innerText = detailsText;
             }
 
@@ -134,9 +142,19 @@
                     const tr = document.createElement('tr');
                     const color = row.healthy ? 'healthy' : 'unhealthy';
                     
-                    let details = row.error_message || row.status_code;
+                    let detailsObj = {};
+                    try { detailsObj = JSON.parse(row.details_json); } catch(e) {}
+                    const identity = detailsObj.identity || {};
+                    const targetName = identity.name || row.service_host;
+                    const targetHost = identity.host ? ` (${identity.host})` : '';
+                    const details = row.error_message || row.status_code;
 
-                    tr.innerHTML = `<td style="color:#555">${row.created_at}</td><td class="${color}">${row.status_code}</td><td style="color:#666">${details}</td>`;
+                    tr.innerHTML = `
+                        <td style="color:#555">${row.created_at}</td>
+                        <td>${targetName}${targetHost}</td>
+                        <td class="${color}">${row.status_code}</td>
+                        <td style="color:#666">${details}</td>
+                    `;
                     tbody.appendChild(tr);
                 });
             }

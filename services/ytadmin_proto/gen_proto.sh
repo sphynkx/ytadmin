@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Generate stubs from ytadmin.proto
-# Make sure that ytadmin is identical to one from ytadmin service!!
+# Make sure that yurtube.proto is identical to one from Yurtube app!!
 
 cd "$(dirname "$0")"
 
@@ -12,8 +12,8 @@ python -m grpc_tools.protoc \
   -I . \
   --python_out=. \
   --grpc_python_out=. \
-  ytadmin.proto
+  yurtube.proto
 
-sed -i 's/^import ytadmin_pb2 as ytadmin__pb2/from . import ytadmin_pb2 as ytadmin__pb2/' ytadmin_pb2_grpc.py
+sed -i 's/^import yurtube_pb2 as yurtube__pb2/from . import yurtube_pb2 as yurtube__pb2/' yurtube_pb2_grpc.py
 
-echo "Generated: ytadmin_pb2.py ytadmin_pb2_grpc.py in $(pwd)"
+echo "Generated: yurtube_pb2.py yurtube_pb2_grpc.py in $(pwd)"

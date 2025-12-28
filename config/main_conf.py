@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     TARGET_APP_HOST: str = "localhost"
     TARGET_APP_PORT: int = 50051
     
+    ADMIN_INGEST_HOST: str = "0.0.0.0"
+    ADMIN_INGEST_PORT: int = 50052
+    
     DB_PATH: str = "admin.db"
 
     class Config:

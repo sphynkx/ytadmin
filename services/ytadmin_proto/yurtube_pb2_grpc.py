@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from . import ytadmin_pb2 as ytadmin__pb2
+from . import yurtube_pb2 as yurtube__pb2
 
 
 class AdminIngestStub(object):
@@ -16,13 +16,13 @@ class AdminIngestStub(object):
         """
         self.PushHealth = channel.unary_unary(
                 '/ytadmin.AdminIngest/PushHealth',
-                request_serializer=ytadmin__pb2.PushHealthRequest.SerializeToString,
-                response_deserializer=ytadmin__pb2.PushAck.FromString,
+                request_serializer=yurtube__pb2.PushHealthRequest.SerializeToString,
+                response_deserializer=yurtube__pb2.PushAck.FromString,
                 )
         self.PushEffConf = channel.unary_unary(
                 '/ytadmin.AdminIngest/PushEffConf',
-                request_serializer=ytadmin__pb2.PushEffConfRequest.SerializeToString,
-                response_deserializer=ytadmin__pb2.PushAck.FromString,
+                request_serializer=yurtube__pb2.PushEffConfRequest.SerializeToString,
+                response_deserializer=yurtube__pb2.PushAck.FromString,
                 )
 
 
@@ -46,13 +46,13 @@ def add_AdminIngestServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'PushHealth': grpc.unary_unary_rpc_method_handler(
                     servicer.PushHealth,
-                    request_deserializer=ytadmin__pb2.PushHealthRequest.FromString,
-                    response_serializer=ytadmin__pb2.PushAck.SerializeToString,
+                    request_deserializer=yurtube__pb2.PushHealthRequest.FromString,
+                    response_serializer=yurtube__pb2.PushAck.SerializeToString,
             ),
             'PushEffConf': grpc.unary_unary_rpc_method_handler(
                     servicer.PushEffConf,
-                    request_deserializer=ytadmin__pb2.PushEffConfRequest.FromString,
-                    response_serializer=ytadmin__pb2.PushAck.SerializeToString,
+                    request_deserializer=yurtube__pb2.PushEffConfRequest.FromString,
+                    response_serializer=yurtube__pb2.PushAck.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -76,8 +76,8 @@ class AdminIngest(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/ytadmin.AdminIngest/PushHealth',
-            ytadmin__pb2.PushHealthRequest.SerializeToString,
-            ytadmin__pb2.PushAck.FromString,
+            yurtube__pb2.PushHealthRequest.SerializeToString,
+            yurtube__pb2.PushAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -93,7 +93,7 @@ class AdminIngest(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/ytadmin.AdminIngest/PushEffConf',
-            ytadmin__pb2.PushEffConfRequest.SerializeToString,
-            ytadmin__pb2.PushAck.FromString,
+            yurtube__pb2.PushEffConfRequest.SerializeToString,
+            yurtube__pb2.PushAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
