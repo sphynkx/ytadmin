@@ -51,6 +51,7 @@ async def exec_grpcurl(
         if not out_text:
             return {}
         try:
+            print(f"DATA: {json.loads(out_text)=}")
             return json.loads(out_text)
         except json.JSONDecodeError:
             return {"raw": out_text}
