@@ -1,0 +1,23 @@
+[Unit]
+Description=YTAdmin Control Panel
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/ytadmin
+ExecStart=/opt/ytadmin/.venv/bin/python /opt/ytadmin/main.py
+Environment=PYTHONUNBUFFERED=1
+
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
