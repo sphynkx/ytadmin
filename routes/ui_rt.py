@@ -13,7 +13,7 @@ async def index(request: Request):
     if not user:
         return templates.TemplateResponse("login.html", {"request": request})
     
-    return templates.TemplateResponse("dashboard.html", {"request": request, "username": user})
+    return templates.TemplateResponse("dashboard.html", {"request": request, "username": user, "title": "Dashboard"})
 
 @router.get("/targets")
 async def targets_page(request: Request):
@@ -23,4 +23,4 @@ async def targets_page(request: Request):
     if not user:
         return templates.TemplateResponse("login.html", {"request": request})
     
-    return templates.TemplateResponse("targets.html", {"request": request, "username": user})
+    return templates.TemplateResponse("targets.html", {"request": request, "username": user, "title": "Targets"})
