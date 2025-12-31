@@ -9,15 +9,15 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS health_snapshots (
+CREATE TABLE IF NOT EXISTS targets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    service_host TEXT NOT NULL,
-    healthy BOOLEAN DEFAULT 0,
-    status_code TEXT,
-    details_json TEXT,
-    error_message TEXT,
+    host TEXT NOT NULL,
+    port INTEGER NOT NULL,
+    key TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_targets_host_port ON targets(host, port);
 """
 
 async def init_db():

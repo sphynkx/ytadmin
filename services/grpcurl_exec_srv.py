@@ -15,8 +15,8 @@ async def exec_grpcurl(
     timeout_sec: int = 3,
 ) -> Dict:
     """
-    Universal `grpcurl` call via Server Reflection.
-    Returns a parsed JSON response or a dictionary with the "error" key.
+    Universal grpcurl call via Server Reflection, WITHOUT local .proto.
+    Returns parsed JSON or dict with "error".
     """
     target = f"{host}:{port}"
     cmd = ["grpcurl"]
@@ -51,7 +51,6 @@ async def exec_grpcurl(
         if not out_text:
             return {}
         try:
-            ##print(f"OUTP: {json.loads(out_text)=}")
             return json.loads(out_text)
         except json.JSONDecodeError:
             return {"raw": out_text}

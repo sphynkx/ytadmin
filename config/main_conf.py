@@ -22,10 +22,11 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "SECRET"
 
-    TARGET_APP_HOST: str = "localhost"
-    TARGET_APP_PORT: int = 50051
+    ## Deprecated
+    ##TARGET_APP_HOST: str = "localhost"
+    ##TARGET_APP_PORT: int = 50051
     
-    DB_PATH: str = "admin.db"
+    DB_PATH: str = "ytadmin.db"
 
     class Config:
         env_file = ".env"

@@ -18,91 +18,98 @@
             padding-bottom: 15px; 
             margin-bottom: 25px; 
         }
-        h2, h3 { margin: 0; font-weight: 500; }
-        
-        .status-box { 
-            padding: 20px; 
+        h2 { margin: 0; font-weight: 500; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .card {
             background: #ffffff; 
             border: 1px solid #e1e4e8; 
-            border-radius: 6px; 
-            margin-bottom: 25px; 
+            border-radius: 12px; 
+            padding: 16px; 
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        
-        .healthy { color: #28a745; font-weight: bold; }
-        .unhealthy { color: #dc3545; font-weight: bold; }
-        
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            background: #ffffff; 
-            border: 1px solid #e1e4e8;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        .card-header {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 12px;
         }
-        th, td { 
-            border-bottom: 1px solid #e1e4e8; 
-            padding: 12px 15px; 
-            text-align: left; 
+        .title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
         }
-        th { 
-            background-color: #f8f9fa; 
-            color: #586069; 
-            font-weight: 600; 
-            font-size: 0.9em;
-            text-transform: uppercase;
+        .badge {
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
         }
-        tr:last-child td { border-bottom: none; }
-        tr:hover { background-color: #fcfcfc; }
-        
-        a.logout-btn { 
-            color: #0366d6; 
-            cursor: pointer; 
-            text-decoration: none; 
-            font-size: 0.9em;
-            border: 1px solid #e1e4e8;
-            padding: 5px 10px;
-            border-radius: 4px;
-            background: white;
-        }
-        a.logout-btn:hover { background-color: #f3f4f6; text-decoration: none; }
+        .badge.green { background: #e7f6ee; color: #2c974b; border: 1px solid #ccebd7; }
+        .badge.red { background: #fde8e8; color: #dc3545; border: 1px solid #f5c6cb; }
 
-        .meta { color: #666; font-size: 0.9rem; margin-bottom: 10px; }
+        .row { display: flex; gap: 8px; margin: 8px 0; }
+        .pill { 
+            background: #f3f4f6; 
+            border: 1px solid #e1e4e8; 
+            border-radius: 8px; 
+            padding: 6px 10px; 
+            font-size: 0.85rem; 
+            color: #444;
+        }
+        .meta { color: #666; font-size: 0.9rem; margin-top: 6px; }
+
+        a.header-link {
+            color: #0366d6; 
+            text-decoration: none;
+            border: 1px solid #e1e4e8;
+            padding: 6px 10px;
+            border-radius: 6px;
+            background: white;
+            font-size: 0.9rem;
+        }
+        a.header-link:hover { background-color: #f3f4f6; text-decoration: none; }
+
+        .empty {
+            background: #ffffff; 
+            border: 1px solid #e1e4e8; 
+            border-radius: 12px; 
+            padding: 24px; 
+            text-align: center;
+            color: #555;
+        }
+        .empty h3 { margin: 0 0 8px 0; font-weight: 600; color: #2c3e50; }
+        .empty p { margin: 4px 0; }
     </style>
 </head>
 <body>
     <div class="header">
         <h2>Control Plane: {{ username }}</h2>
-        <a class="logout-btn" onclick="logout()">Sign out</a>
+        <div style="display:flex;gap:8px;">
+            <a class="header-link" href="/targets">Manage targets</a>
+            <a class="header-link" onclick="logout()">Sign out</a>
+        </div>
     </div>
 
-    <div class="status-box">
-        <div class="meta">
-            Target: <strong id="targetName">Loading...</strong> 
-            <span id="targetAddr" style="margin-left:8px; color:#888"></span>
-        </div>
-        <div style="font-size: 1.5rem; margin-bottom: 5px;">
-            Current Status: <span id="mainStatus" class="unhealthy">LOADING...</span>
-        </div>
-        <div style="font-size: 0.9em; color: #666;" id="statusDetails"></div>
+    <div id="emptyState" class="empty" style="display:none;">
+        <h3>No targets yet</h3>
+        <p>Add your first target on the <a href="/targets" class="header-link">Manage targets</a> page.</p>
     </div>
 
-    <h3>Events History</h3>
-    <br>
-    <table id="historyTable">
-        <thead><tr><th>Time</th><th>Target</th><th>Result</th><th>Details</th></tr></thead>
-        <tbody></tbody>
-    </table>
+    <div class="grid" id="cardsGrid"></div>
 
     <script>
-        async function fetchWithAuth(url) {
-            const response = await fetch(url);
-            if (response.status === 401) {
-                window.location.href = '/'; 
+        async function fetchWithAuth(url, opts) {
+            const resp = await fetch(url, opts);
+            if (resp.status === 401) {
+                window.location.href = '/';
                 return null;
             }
-            return response;
+            return resp;
         }
 
         async function logout() {
@@ -110,64 +117,49 @@
             window.location.reload();
         }
 
-        async function refresh() {
-            const sResp = await fetchWithAuth('/api/health/current');
-            if (sResp && sResp.ok) {
-                const sData = await sResp.json();
-                const el = document.getElementById('mainStatus');
-                
-                el.innerText = sData.healthy ? "HEALTHY" : "DOWN";
-                el.className = sData.healthy ? "healthy" : "unhealthy";
+        function renderCards(items) {
+            const grid = document.getElementById('cardsGrid');
+            const empty = document.getElementById('emptyState');
+            grid.innerHTML = '';
 
-                let appName = 'Unknown';
-                let targetAddr = '';
-                if (sData.details) {
-                    if (sData.details.app_name) appName = sData.details.app_name;
-                    if (sData.details.target) targetAddr = sData.details.target;
-                    if (appName === 'Unknown' && sData.details.identity && sData.details.identity.name) {
-                        appName = sData.details.identity.name;
-                    }
-                    if (!targetAddr && sData.details.identity && sData.details.identity.host) {
-                        targetAddr = sData.details.identity.host;
-                    }
-                }
-                document.getElementById('targetName').innerText = appName;
-                document.getElementById('targetAddr').innerText = targetAddr ? `(${targetAddr})` : '';
-
-                let detailsText = sData.status_code || "";
-                if (sData.details && sData.details.uptime) {
-                    detailsText += (detailsText ? " | " : "") + "uptime: " + sData.details.uptime;
-                }
-                if (sData.error) detailsText += (detailsText ? " | " : "") + "(" + sData.error + ")";
-                document.getElementById('statusDetails').innerText = detailsText;
+            if (!items || items.length === 0) {
+                empty.style.display = 'block';
+                return;
             }
+            empty.style.display = 'none';
 
-            const hResp = await fetchWithAuth('/api/health/history');
-            if (hResp && hResp.ok) {
-                const hData = await hResp.json();
-                const tbody = document.querySelector('#historyTable tbody');
-                tbody.innerHTML = '';
-                hData.forEach(row => {
-                    const tr = document.createElement('tr');
-                    const color = row.healthy ? 'healthy' : 'unhealthy';
-                    
-                    let detailsObj = {};
-                    try { detailsObj = JSON.parse(row.details_json); } catch(e) {}
-                    const targetName = (detailsObj.app_name) || (detailsObj.identity && detailsObj.identity.name) || row.service_host;
-                    const targetHost = (detailsObj.target) || (detailsObj.identity && detailsObj.identity.host) || '';
-                    const details = row.error_message || row.status_code;
+            items.forEach(it => {
+                const info = it.details && it.details.info ? it.details.info : {};
+                const appName = (it.details && it.details.app_name) || info.appName || 'Unknown';
+                const statusText = it.healthy ? 'HEALTHY' : 'DOWN';
+                const statusClass = it.healthy ? 'green' : 'red';
+                const targetAddr = `${it.host}:${it.port}`;
+                const uptime = it.details && it.details.uptime ? `${it.details.uptime}` : (info.uptime || '');
 
-                    tr.innerHTML = `
-                        <td style="color:#555">${row.created_at}</td>
-                        <td>${targetName}${targetHost ? ' ('+targetHost+')' : ''}</td>
-                        <td class="${color}">${row.status_code}</td>
-                        <td style="color:#666">${details}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="title">${appName}</div>
+                        <div class="badge ${statusClass}">${statusText}</div>
+                    </div>
+                    <div class="row">
+                        <div class="pill">Addr: ${targetAddr}</div>
+                        ${uptime ? `<div class="pill">Uptime: ${uptime}</div>` : ''}
+                    </div>
+                    <div class="meta">${it.status_code || ''}</div>
+                `;
+                grid.appendChild(card);
+            });
         }
-        
+
+        async function refresh() {
+            const resp = await fetchWithAuth('/api/targets/status');
+            if (!resp || !resp.ok) return;
+            const data = await resp.json();
+            renderCards(data);
+        }
+
         refresh();
         setInterval(refresh, 5000);
     </script>
