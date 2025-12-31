@@ -15,20 +15,24 @@ async function refresh() {
 
     items.forEach(it => {
         const info = (it.details && it.details.info) || {};
-        const appName = pick(it.details, 'app_name') || pick(info, 'appName', 'app_name') || 'Unknown';
-        const instanceId = pick(info, 'instanceId', 'instance_id') || pick(it.details, 'instance_id');
+
+        const displayName = it.app_name || 'Unknown';
+
+        const reportedName = (it.details && it.details.app_name) || info.appName || info.app_name;
+
+        const instanceId = (it.details && it.details.instance_id) || info.instanceId || info.instance_id;
         const statusText = it.healthy ? 'HEALTHY' : 'DOWN';
         const statusClass = it.healthy ? 'green' : 'red';
         const host = it.host;
         const port = it.port;
-        const uptimeRaw = pick(it.details, 'uptime') || pick(info, 'uptime');
+        const uptimeRaw = (it.details && it.details.uptime) || info.uptime;
         const uptime = formatUptime(uptimeRaw);
 
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
             <div class="card-header">
-                <div class="title">${appName}</div>
+                <div class="title">${displayName}</div>
                 <div class="badge ${statusClass}">${statusText}</div>
             </div>
             <div class="row"><div class="pill">Instance: ${instanceId || '-'}</div></div>
@@ -39,6 +43,7 @@ async function refresh() {
             <div class="row">
                 <div class="pill">Uptime: ${uptime || '-'}</div>
             </div>
+            ${reportedName ? `<div class="row"><div class="pill">Reported: ${reportedName}</div></div>` : ''}
             <div class="meta">${it.status_code || ''}</div>
         `;
         grid.appendChild(card);

@@ -5,14 +5,16 @@
 <div class="targets-bar">
     <input id="hostInput" placeholder="Host (e.g., 127.0.0.1)" />
     <input id="portInput" type="number" placeholder="Port (e.g., 50051)" />
+    <input id="appNameInput" placeholder="App name (e.g., YurTube)" />
     <input id="keyInput" placeholder="Key (optional)" />
     <button class="btn" onclick="addTarget()">Add target</button>
 </div>
 
-<table class="table">
-    <thead><tr><th>ID</th><th>Host</th><th>Port</th><th>Key</th><th>Created</th><th>Actions</th></tr></thead>
+<table class="table" id="targetsTable">
+    <thead><tr><th>ID</th><th>Host</th><th>Port</th><th>App name</th><th>Key</th><th>Created</th><th>Actions</th></tr></thead>
     <tbody id="targetsBody"></tbody>
 </table>
+<p style="color:#666;">Tip: drag rows to reorder; dashboard cards follow this order.</p>
 {% endblock %}
 
 {% block scripts %}

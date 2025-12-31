@@ -12,10 +12,10 @@ MEMORY_STATUS = {
     "last_check": "Never",
     "details": {},
     # statuses per all monitored targets
-    "targets": {}  # key -> {"host","port","healthy","status_code","details"}
+    "targets": []  # list of {"host","port","app_name","sort_index","healthy","status_code","details"}
 }
 
-async def poll_one_target(host: str, port: int):
+async def poll_one_target(host: str, port: int, app_name: str | None, sort_index: int | None):
     target = f"{host}:{port}"
 
     info = await exec_grpcurl(
@@ -46,6 +46,10 @@ async def poll_one_target(host: str, port: int):
             details["app_name"] = info["app_name"]
         if "uptime" in info:
             details["uptime"] = info["uptime"]
+        if "instance_id" in info:
+            details["instance_id"] = info["instance_id"]
+        elif "instanceId" in info:
+            details["instance_id"] = info["instanceId"]
     else:
         if isinstance(info, dict) and info.get("error"):
             details["info_error"] = info["error"]
@@ -56,6 +60,8 @@ async def poll_one_target(host: str, port: int):
     return {
         "host": host,
         "port": port,
+        "app_name": app_name,
+        "sort_index": sort_index,
         "healthy": healthy,
         "status_code": status_code if settings.ADMIN_PULL_ENABLED else ("INFO_OK" if healthy_info else "ERROR"),
         "details": details
@@ -68,16 +74,20 @@ async def health_poll_worker():
         while True:
             try:
                 targets = await get_all_targets()
-                statuses = {}
+                statuses = []
                 for t in targets:
                     host = t["host"]
                     port = int(t["port"])
-                    res = await poll_one_target(host, port)
-                    statuses[f"{host}:{port}"] = res
+                    app_name = t.get("app_name")
+                    sort_index = t.get("sort_index")
+                    res = await poll_one_target(host, port, app_name, sort_index)
+                    statuses.append(res)
+
+                # keep sorted order for dashboards
+                statuses.sort(key=lambda x: (x.get("sort_index") if x.get("sort_index") is not None else 0, x["host"], x["port"]))
 
                 MEMORY_STATUS["targets"] = statuses
-
-                MEMORY_STATUS["healthy"] = all(s["healthy"] for s in statuses.values()) if statuses else False
+                MEMORY_STATUS["healthy"] = all(s["healthy"] for s in statuses) if statuses else False
                 MEMORY_STATUS["details"] = {"targets_count": len(statuses)}
             except Exception as e:
                 logger.error(f"Poll worker iteration error: {e}")

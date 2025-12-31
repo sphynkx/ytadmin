@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS targets (
     host TEXT NOT NULL,
     port INTEGER NOT NULL,
     key TEXT,
+    app_name TEXT,            -- user-provided display name for dashboard
+    sort_index INTEGER DEFAULT 0, -- ordering index for dashboard/targets list
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

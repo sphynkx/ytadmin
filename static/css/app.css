@@ -48,7 +48,7 @@ body {
     margin-bottom: 12px;
 }
 .title {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #2c3e50;
 }
@@ -67,7 +67,7 @@ body {
     border: 1px solid #e1e4e8; 
     border-radius: 8px; 
     padding: 6px 10px; 
-    font-size: 0.85rem; 
+    font-size: 0.9rem; 
     color: #444;
 }
 
@@ -128,3 +128,14 @@ body {
 }
 .table tr:last-child td { border-bottom: none; }
 .table tr:hover { background-color: #fcfcfc; }
+
+.drag-hint { color: #888; font-size: 0.85rem; margin-top: 8px; }
+.action-btn {
+    border: 1px solid #e1e4e8;
+    background: white;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    margin-right: 6px;
+}
+.action-btn:hover { background-color: #f3f4f6; }
