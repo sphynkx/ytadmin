@@ -1,4 +1,4 @@
-Admin panel for monitoring and manage of all YurTube apps and services. Monitoring implemented by gRPC calls via an external utility.
+Admin panel for monitoring and manage of all [YurTube](https://github.com/sphynkx/yurtube) apps and services. Monitoring implemented by gRPC calls via an external utility.
 
 
 ## Install
