@@ -121,15 +121,24 @@
 
                 let appName = 'Unknown';
                 let targetAddr = '';
-                if (sData.details && sData.details.identity) {
-                    appName = sData.details.identity.name || appName;
-                    targetAddr = sData.details.identity.host || targetAddr;
+                if (sData.details) {
+                    if (sData.details.app_name) appName = sData.details.app_name;
+                    if (sData.details.target) targetAddr = sData.details.target;
+                    if (appName === 'Unknown' && sData.details.identity && sData.details.identity.name) {
+                        appName = sData.details.identity.name;
+                    }
+                    if (!targetAddr && sData.details.identity && sData.details.identity.host) {
+                        targetAddr = sData.details.identity.host;
+                    }
                 }
                 document.getElementById('targetName').innerText = appName;
                 document.getElementById('targetAddr').innerText = targetAddr ? `(${targetAddr})` : '';
 
                 let detailsText = sData.status_code || "";
-                if (sData.error) detailsText += " (" + sData.error + ")";
+                if (sData.details && sData.details.uptime) {
+                    detailsText += (detailsText ? " | " : "") + "uptime: " + sData.details.uptime;
+                }
+                if (sData.error) detailsText += (detailsText ? " | " : "") + "(" + sData.error + ")";
                 document.getElementById('statusDetails').innerText = detailsText;
             }
 
@@ -144,14 +153,13 @@
                     
                     let detailsObj = {};
                     try { detailsObj = JSON.parse(row.details_json); } catch(e) {}
-                    const identity = detailsObj.identity || {};
-                    const targetName = identity.name || row.service_host;
-                    const targetHost = identity.host ? ` (${identity.host})` : '';
+                    const targetName = (detailsObj.app_name) || (detailsObj.identity && detailsObj.identity.name) || row.service_host;
+                    const targetHost = (detailsObj.target) || (detailsObj.identity && detailsObj.identity.host) || '';
                     const details = row.error_message || row.status_code;
 
                     tr.innerHTML = `
                         <td style="color:#555">${row.created_at}</td>
-                        <td>${targetName}${targetHost}</td>
+                        <td>${targetName}${targetHost ? ' ('+targetHost+')' : ''}</td>
                         <td class="${color}">${row.status_code}</td>
                         <td style="color:#666">${details}</td>
                     `;
