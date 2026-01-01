@@ -43,7 +43,7 @@ async function refresh() {
             <div class="row">
                 <div class="pill">Uptime: ${uptime || '-'}</div>
             </div>
-            ${reportedName ? `<div class="row"><div class="pill">Reported: ${reportedName}</div></div>` : ''}
+            ${reportedName ? `<div class="row"><div class="pill">Description: ${reportedName}</div></div>` : ''}
             <div class="meta">${it.status_code || ''}</div>
         `;
         grid.appendChild(card);
