@@ -1,0 +1,19 @@
+services:
+  ytadmin:
+    build:
+      context: ../../
+      dockerfile: install/docker/Dockerfile
+    env_file:
+      - ../../.env
+    environment:
+      PYTHONUNBUFFERED: "1"
+      DB_PATH: "/var/lib/ytadmin/ytadmin.db"
+    volumes:
+      - ytadmin_data:/var/lib/ytadmin
+    ports:
+      - "${ADMIN_PORT:-9090}:${ADMIN_PORT:-9090}"
+    command: ["python3", "main.py"]
+    restart: unless-stopped
+
+volumes:
+  ytadmin_data:

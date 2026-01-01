@@ -43,5 +43,12 @@ journalctl -u ytadmin -f
 ```
 
 
+## Docker install and run
+```bash
+cd install/docker
+docker compose up --build -d
+```
+
+
 ## Usage
 Open `http://localhost:9090`, login as admin. At "Manage targets" add items for monitoring (host, port, some name..).
