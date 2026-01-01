@@ -139,3 +139,19 @@ body {
     margin-right: 6px;
 }
 .action-btn:hover { background-color: #f3f4f6; }
+
+/* Users table */
+.sortable { cursor: pointer; }
+.sort-asc::after { content: " ▲"; color: #888; font-size: 0.8em; }
+.sort-desc::after { content: " ▼"; color: #888; font-size: 0.8em; }
+
+/* Goriz.scroll for long cells */
+.cell-scroll {
+    max-width: 150px;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: block;
+    padding-bottom: 4px;
+    border-radius: 4px;
+    background: #fafafa;
+}

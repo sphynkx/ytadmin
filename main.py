@@ -8,6 +8,7 @@ from config.main_conf import settings
 from db.database_db import init_db
 from db.users_db import ensure_admin_exists
 from services.health_poll_srv import health_poll_worker
+from db.app_db_pg_srv import init_app_db_pool, close_app_db_pool
 from routes import register_routes
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -18,6 +19,9 @@ async def lifespan(app: FastAPI):
     logger.info("--- STARTUP: Initializing DB ---")
     await init_db()
     await ensure_admin_exists()
+
+    logger.info("--- STARTUP: Init app database pool ---")
+    await init_app_db_pool()
     
     logger.info("--- STARTUP: Launching Background Tasks ---")
     poll_task = asyncio.create_task(health_poll_worker())
@@ -30,6 +34,9 @@ async def lifespan(app: FastAPI):
         await poll_task
     except asyncio.CancelledError:
         logger.info("Background task cancelled successfully")
+
+    logger.info("--- SHUTDOWN: Close app database pool ---")
+    await close_app_db_pool()
 
 app = FastAPI(title=settings.APP_TITLE, lifespan=lifespan, docs_url=None, redoc_url=None)
 

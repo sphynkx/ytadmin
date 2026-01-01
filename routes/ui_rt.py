@@ -24,3 +24,13 @@ async def targets_page(request: Request):
         return templates.TemplateResponse("login.html", {"request": request})
     
     return templates.TemplateResponse("targets.html", {"request": request, "username": user, "title": "Targets"})
+
+@router.get("/users")
+async def users_page(request: Request):
+    session_id = request.cookies.get("session_id")
+    user = SESSIONS.get(session_id)
+    
+    if not user:
+        return templates.TemplateResponse("login.html", {"request": request})
+    
+    return templates.TemplateResponse("users.html", {"request": request, "username": user, "title": "Users"})

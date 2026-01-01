@@ -18,8 +18,21 @@ ADMIN_PASSWORD=SECRET
 
 ADMIN_PULL_ENABLED=true
 PUSH_STALE_THRESHOLD_SEC=60
+
+# YurTube DB
+DB_NAME=yt_db
+DB_USER=yt_user
+DB_PASS=SECRET
+DB_HOST=192.168.7.3
+DB_PORT=5432
 ```
-set your password.
+set your passwords.
+
+Go to YurTube side.  Edit `/var/lib/pgsql/data/pg_hba.conf` (or find placement of this file in your system), add line with IP of ytadmin side:
+```conf
+host    yt_db           yt_user   192.168.7.8/32   scram-sha-256
+```
+and restart postgres.
 
 ```bash
 systemctl daemon-reload

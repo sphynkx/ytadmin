@@ -22,11 +22,17 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str = "admin"
     ADMIN_PASSWORD: str = "SECRET"
 
-    ## Deprecated
-    ##TARGET_APP_HOST: str = "localhost"
-    ##TARGET_APP_PORT: int = 50051
+    TARGET_APP_HOST: str = "localhost"
+    TARGET_APP_PORT: int = 50051
     
     DB_PATH: str = "ytadmin.db"
+
+    # App database (Postgres) connection settings
+    DB_NAME: str = "yt_db"
+    DB_USER: str = "yt_user"
+    DB_PASS: str = "SECRET"
+    DB_HOST: str = "192.168.7.3"
+    DB_PORT: int = 5432
 
     class Config:
         env_file = ".env"

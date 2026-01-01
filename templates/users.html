@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 style="margin:0 0 16px 0; font-weight:500;">Users</h2>
+
+<div id="usersEmpty" class="empty" style="display:none;">
+    <h3>No users</h3>
+    <p>There are no rows in application users table.</p>
+</div>
+
+<table class="table" id="usersTable" style="display:none;">
+    <thead id="usersHead"></thead>
+    <tbody id="usersBody"></tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/users.js"></script>
+{% endblock %}
