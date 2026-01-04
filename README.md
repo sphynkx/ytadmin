@@ -8,7 +8,7 @@ cd /opt
 git clone https://github.com/sphynkx/ytadmin
 cd ytadmin
 python3 -m venv .venv
-install/pipinstall
+install/pipinstall.sh
 cp install/ytadmin.service /etc/systemd/system/
 ```
 Create `.env`:
