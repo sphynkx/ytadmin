@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     APP_TITLE: str = "Admin Control Plane"
     
     ADMIN_HOST: str = "0.0.0.0" 
-    ADMIN_PORT: int = 9090
+    ADMIN_PORT: int = 9091
     
     ADMIN_ENABLED: bool = True
     ADMIN_POLL_INTERVAL_SEC: int = 10
@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str = "SECRET"
 
     TARGET_APP_HOST: str = "localhost"
-    TARGET_APP_PORT: int = 50051
+    TARGET_APP_PORT: int = 9090
     
     DB_PATH: str = "ytadmin.db"
 
