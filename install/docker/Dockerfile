@@ -15,6 +15,6 @@ RUN if [ -f /app/requirements.txt ]; then \
 
 COPY . /app
 
-EXPOSE 9090
+EXPOSE 9091
 
 CMD ["python3", "main.py"]
